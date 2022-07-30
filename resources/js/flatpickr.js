@@ -7,11 +7,11 @@ flatpickr("#event_date", {
   maxDate: new Date().fp_incr(30)
 });
 
-// flatpickr("#calendar", {
-//   "locale": Japanese,
-//   // minDate: "today",
-//   maxDate: new Date().fp_incr(30)
-// });
+flatpickr("#calendar", {
+  "locale": Japanese,
+  // minDate: "today",
+  maxDate: new Date().fp_incr(30)
+});
 
 const setting = {
   "locale": Japanese,
