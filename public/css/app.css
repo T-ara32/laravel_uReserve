@@ -1337,6 +1337,8 @@ video {
   padding-top: 2rem;
 }.pb-0 {
   padding-bottom: 0px;
+}.pb-2 {
+  padding-bottom: 0.5rem;
 }.text-left {
   text-align: left;
 }.text-center {
