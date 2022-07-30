@@ -6,7 +6,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class EventServices
+class EventService
 {
   public static function checkEventDuplication($eventDate, $startTime, $endTime)
   {
@@ -23,5 +23,16 @@ class EventServices
   {
     $join = $date . " " . $time;
     return Carbon::createFromFormat('Y-m-d H:i' , $join);
+  }
+
+  public static function countEventDuplication($eventDate, $startTime, $endTime)
+  {
+    $check = DB::table('events')
+    ->whereDate('start_date', $eventDate)
+    ->whereTime('end_date', '>', $startTime)
+    ->whereTime('start_date', '<', $endTime)
+    ->count();
+
+    return $check;
   }
 }

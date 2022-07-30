@@ -7,7 +7,7 @@ use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Service\EventService;
+use App\Services\EventService;
 
 class EventController extends Controller
 {
@@ -18,7 +18,10 @@ class EventController extends Controller
      */
     public function index()
     {
+        $today = Carbon::today();
+
         $events = DB::table('events')
+        ->whereDate('start_date', '>=', $today)
         ->orderBy('start_date', 'asc')
         ->paginate(10);
 
@@ -79,35 +82,60 @@ class EventController extends Controller
         return view('manager.events.show', compact('event', 'eventDate', 'startTime', 'endTime'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Event  $event
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Event $event)
     {
-        //
+        $event = Event::findOrFail($event->id);
+        $eventDate = $event->editEventDate;
+        $startTime = $event->start_time;
+        $endTime = $event->endTime;
+
+        return view('manager.events.edit', compact('event', 'eventDate', 'startTime', 'endTime'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateEventRequest  $request
-     * @param  \App\Models\Event  $event
-     * @return \Illuminate\Http\Response
-     */
+
     public function update(UpdateEventRequest $request, Event $event)
     {
-        //
+        $check = EventService::countEventDuplication(
+            $request['event_date'], $request['start_time'], $request['end_time']
+        );
+
+        if($check > 1) {
+            $event = Event::findOrFail($event->id);
+            $eventDate = $event->editEventDate;
+            $startTime = $event->start_time;
+            $endTime = $event->endTime;
+            session()->flash('status', 'この時間帯はすでに他の予約が存在します。');
+            return view('manager.events.edit', compact('event', 'eventDate', 'startTime', 'endTime'));
+        }
+
+        $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_time']);
+        $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_time']);
+
+        $event = Event::findOrFail($event->id);
+        $event->name = $request['event_name'];
+        $event->information = $request['information'];
+        $event->start_date = $startDate;
+        $event->end_date = $endDate;
+        $event->max_people = $request['max_people'];
+        $event->is_visible = $request['is_visible'];
+        $event->save();
+
+        session()->flash('status', '更新しました');
+
+        return redirect()->route('events.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Event  $event
-     * @return \Illuminate\Http\Response
-     */
+    public function past()
+    {
+        $today = Carbon::today();
+        $events = DB::table('events')
+        ->whereDate('start_date', '<', $today)
+        ->orderBy('start_date', 'desc')
+        ->paginate(10);
+
+        return view('manager.events.past', compact('events'));
+    }
+
     public function destroy(Event $event)
     {
         //
