@@ -27,9 +27,9 @@ class ReservationController extends Controller
         ->first();
 
         if(!is_null($reservedPeople)){
-            $reservedPeople = $event->max_people - $reservedPeople->number_of_people;
+            $reservablePeople = $event->max_people - $reservedPeople->number_of_people;
         } else {
-            $reservedPeople = $event->max_people;
+            $reservablePeople = $event->max_people;
         }
 
         return view('event-detail', compact('event', 'reservedPeople'));
