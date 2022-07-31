@@ -4,6 +4,10 @@
 
 @import 'flatpickr/dist/flatpickr.css';
 
+.event-calendar {
+  width: 1000px;
+}
+
 .flatpickr-calendar {
   background: transparent;
   opacity: 0;
